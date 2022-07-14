@@ -1,15 +1,22 @@
+require("dotenv").config();
+
 const fs = require("fs");
 const express = require("express");
 const app = require('express')();
 const https = require('https');
 
-var privateKey  = fs.readFileSync('test_key.pem', 'utf8');
-var certificate = fs.readFileSync('test_cert.pem', 'utf8');
+var privateKey  = fs.readFileSync(process.env.HTTPS_KEY_PATH, 'utf8');
+var certificate = fs.readFileSync(process.env.HTTPS_CERT_PATH, 'utf8');
 
 var credentials = {
     "key" : privateKey,
     "cert" : certificate
 };
+
+if(process.env.HTTPS_CA_PATH != "") {
+    var ca = fs.readFileSync(process.env.HTTPS_CERT_PATH, 'utf8');
+    credentials.ca = ca;
+}
 
 const httpsServer = https.createServer(credentials, app);
 const io = require('socket.io')(httpsServer);
