@@ -45,6 +45,19 @@ app.on('window-all-closed', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
+
+var osc = require("osc");
+
+var udpPort = new osc.UDPPort({
+  // This is where sclang is listening for OSC messages.
+  remoteAddress: "127.0.0.1",
+  remotePort: 57120,
+  metadata: true
+});
+
+// Open the socket.
+udpPort.open();
+
 const socket = io("https://eig.glowbox.io/monitor");
 
 socket.on("error", () => {
@@ -57,34 +70,6 @@ socket.on("connect_error", (e) => {
 
 socket.on("connect", () => {
   console.log("connect");
-
-  const engine = socket.io.engine;
-  console.log(engine.transport.name); // in most cases, prints "polling"
-
-  engine.once("upgrade", () => {
-    // called when the transport is upgraded (i.e. from HTTP long-polling to WebSocket)
-    console.log(engine.transport.name); // in most cases, prints "websocket"
-  });
-
-  engine.on("packet", ({ type, data }) => {
-    // called for each packet received
-    console.log("packet");
-  });
-
-  engine.on("packetCreate", ({ type, data }) => {
-    // called for each packet sent
-    console.log("packetCreate");
-  });
-
-  engine.on("drain", () => {
-    // called when the write buffer is drained
-    console.log("drain");
-  });
-
-  engine.on("close", (reason) => {
-    // called when the underlying connection is closed
-    console.log("close");
-  });
 });
 
 socket.on("disconnect", () => {
@@ -92,7 +77,69 @@ socket.on("disconnect", () => {
 });
 
 socket.on("clients", (data) => {
-  console.log(data); // undefined
+  console.log(`Processing ${data.length} players`);
+  for (i = 0; i < data.length; i++) {
+
+    var msg = {
+      address: `/player`,
+      args: [
+        {
+          type: "i",
+          value: data[i].id
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[2]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[2]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[2]
+        },
+        {
+          type: "f",
+          value: data[i].tap.count
+        },
+        {
+          type: "f",
+          value: data[i].tap.rate
+        },
+        {
+          type: "f",
+          value: data[i].zone
+        }
+      ]
+    };
+    //console.log("Sending message", msg.address, msg.args, "to", udpPort.options.remoteAddress + ":" + udpPort.options.remotePort);
+    udpPort.send(msg);
+  }
 });
 
 console.log('Running');
