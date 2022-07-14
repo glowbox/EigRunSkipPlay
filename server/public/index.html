@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+        <script src="socket.io.min.js"></script>
+        
+        <style>
+            html,
+            body {
+                margin:0px;
+                padding:0px;
+                width:100%;
+                height:100%;
+                background:rgb(124, 201, 234);
+            }
+            
+            #debug {
+            }
+
+            #canvas {
+                background:#cccccc;
+                width:100%;
+                height:100%;
+            }
+
+            #startup {
+                margin:0px;
+                padding:0px;
+                width:100%;
+                height:100%;
+                display:flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #status {
+                padding:20px;
+                font-weight:bold;
+            }
+
+            #permission {
+                padding:20px;
+                width:70%;
+                background:white;
+            }
+
+            #permission-button {
+                cursor:pointer;
+                display:inline-block;
+                padding:10px;
+                border-radius:4px;
+                background:rgb(234, 124, 232);
+            }
+
+            #zones {
+                padding:20px;
+            }
+
+            #zones input {
+                padding:20px;
+            }
+
+            #zones input.selected {
+                background-color:yellow;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="startup">
+            <div id="permission">
+                <div>This experience uses the motion sensors in your device. Please allow the 
+                web page access to the sensor data by tapping the button below.</div>
+                <div id="permission-button">Request Access to Data</div>
+            </div>
+        </div>
+
+        <div id="canvas">            
+            <div id="status"></div>
+            <div id="zones">
+                <input type="button" id="zone-0" onclick="setZone(0)" value="zone 1">
+                <input type="button" id="zone-1" onclick="setZone(1)" value="zone 2">
+                <input type="button" id="zone-2" onclick="setZone(2)" value="zone 3">
+                <input type="button" id="zone-3" onclick="setZone(3)" value="zone 4">
+                <input type="button" id="zone-4" onclick="setZone(4)" value="zone 5">
+            </div>
+            <pre id="debug"></pre>
+        </div>
+        
+        <script>
+
+            let broadcastInterval = (1000 / 5);
+
+            let canvas = document.getElementById("canvas");
+            let status = document.getElementById("status");
+            let debug = document.getElementById("debug");
+            let startupModal = document.getElementById("startup");
+            let permissionButton = document.getElementById("permission-button");
+
+            status.innerHTML = "Starting up...";
+            
+            const socket = io();
+
+
+            let nextMessageTime = 0;
+
+            let currentZone = -1;
+
+            let motionState = {
+                "rotationRate" : [0,0,0],
+                "acceleration" : [0,0,0],
+                "orientation"  : [0,0,0]
+            };
+
+            let tapState = {
+                "count" : 0,
+                "rate" : 0
+            };
+
+            let tapCount = 0;
+            let tapCountPerSecond = 0;
+            let tapAverageSampleCount = 8;
+            let tapTotals = [];
+
+            function onTap(event) {               
+                
+                //if(firstTap) {
+                //  firstTap = false;
+                //  canvas.requestFullscreen();
+                // }
+
+                if(socket.connected) {
+                    socket.emit("tap", {
+                        "count" : 1
+                    });
+                }
+            }
+
+            socket.on("error", (data) => {
+                status.innerHTML = "Error.";
+            })
+
+            socket.on("register", (data) => {
+                status.innerHTML = "Connected, id=" + data.id;
+            });
+
+            socket.on("disconnect", () => {
+                status.innerHTML = "Disconnected";
+            });
+
+            socket.on("connect", () => {
+                socket.emit("register");
+            });
+
+
+            if(window.hasOwnProperty("touchstart")) {
+                canvas.addEventListener("touchstart", onTap, false);
+            } else {
+                canvas.addEventListener("mousedown", onTap, false);
+            }
+
+
+            function initializeMotionEvents() {
+                window.addEventListener('devicemotion', (event) => {
+                    motionState.rotationRate[0] = event.rotationRate.alpha;
+                    motionState.rotationRate[1] = event.rotationRate.beta;
+                    motionState.rotationRate[2] = event.rotationRate.gamma;
+
+                    motionState.acceleration[0] = event.acceleration.x;
+                    motionState.acceleration[1] = event.acceleration.y;
+                    motionState.acceleration[2] = event.acceleration.z;
+                });
+
+                window.addEventListener('deviceorientation',(event) => {
+                    motionState.orientation[0] = event.alpha;
+                    motionState.orientation[1] = event.beta;
+                    motionState.orientation[2] = event.gamma;                    
+                });        
+            }
+
+            function setZone(zone) {
+                if(currentZone != zone) {
+
+                    for(var i = 0; i < 5; i++){
+                        document.getElementById("zone-" + i).classList.remove("selected");
+                    }
+                    document.getElementById("zone-" + zone).classList.add("selected");
+
+                    socket.emit("zone", {
+                        "leaving" : currentZone,
+                        "joining" : zone
+                    });
+
+                    currentZone = zone;
+                }
+            }
+
+
+            function update() {
+                
+                let now = Date.now();
+                
+                if(nextMessageTime < now) {
+
+                    debug.innerHTML = JSON.stringify(motionState, null, 2);
+                    nextMessageTime = now + broadcastInterval;
+                    
+                    if(socket.connected){
+                        socket.emit("motion", motionState);
+                        socket.emit("tap", tapState);
+                    }
+                }
+
+                requestAnimationFrame(update);
+            }
+
+
+            function showStartupModal() {
+                startupModal.style.display = "flex";
+            }
+
+            
+            function hideStartupModal() {
+                startupModal.style.display = "none";
+            }
+
+            permissionButton.addEventListener("click", () => {
+                DeviceMotionEvent.requestPermission().then(response => {
+                    if (response == "granted") {
+                        hideStartupModal();
+                        initializeMotionEvents();
+                    } else {
+                        // TODO: Show some kind of error/sorry message.
+                    }
+                });
+            });
+
+
+            if( DeviceMotionEvent.hasOwnProperty("requestPermission") ) {
+                showStartupModal();
+            } else {
+                hideStartupModal();
+                initializeMotionEvents();
+            }
+
+            update();
+
+        </script>
+
+    </body>
+</html>

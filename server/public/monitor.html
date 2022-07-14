@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+        <script src="socket.io.min.js"></script>
+        
+        <style>
+            html,
+            body {
+                margin:0px;
+                padding:0px;
+                width:100%;
+                height:100%;
+                background:rgb(124, 201, 234);
+            }
+            #canvas {
+                background:#cccccc;
+                width:100%;
+                height:100%;
+            }
+
+            #startup {
+                margin:0px;
+                padding:0px;
+                width:100%;
+                height:100%;
+                display:flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #status {
+                padding:20px;
+                font-weight:bold;
+            }
+
+            #permission {
+                padding:20px;
+                width:70%;
+                background:white;
+            }
+
+            #permission-button {
+                cursor:pointer;
+                display:inline-block;
+                padding:10px;
+                border-radius:4px;
+                background:rgb(234, 124, 232);
+            }
+
+            #data tr td {
+                height:26px;
+                border:1px solid black;
+            }
+
+            #data tr td {
+                height:26px;
+            }
+
+            .graph-values {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .graph-values div {
+                display:inline-block;
+                margin-left:2px;
+                min-height:1px;
+                width:10px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="canvas">
+            
+            <div id="status"></div>
+            
+            <table width="100%"">
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Zone</td>
+                        <td>Taps</td>
+                        <td>Rotation</td>
+                        <td>Acceleration</td>
+                        <td>Orientation</td>
+                    </tr>
+                </thead>
+                <tbody id="data"></tbody>
+            </table>
+        </div>
+        
+        <script>
+
+            function smoothstep (min, max, value) {
+                var x = Math.max(0, Math.min(1, (value-min)/(max-min)));
+                return x*x*(3 - 2*x);
+            };
+
+            function makeValueDiv(color, min, max, value) {
+                let div = document.createElement("div");
+                let v = smoothstep(min, max, value);
+                div.className = "value"
+                div.style.height =  (v*20)+ "px";
+                div.style.width = "10px";
+                div.style.backgroundColor = color;
+                return div;
+            }
+
+            function makeGraphNode() {
+                let cell = document.createElement("td");
+                let container = document.createElement("div");
+                container.classList.add("graph-values");
+                let result = {
+                    "cell" : cell,
+                    "container" : container,
+                    "values" : []
+                };
+
+                for(var i = 0; i < 3; i++){
+                    let div = document.createElement("div");
+                    container.appendChild(div);
+                    result.values.push(div);
+                }
+                cell.appendChild(container);
+
+                return result;
+            }
+
+            let rowCount = 4;
+
+            let broadcastInterval = (1000 / 5);
+
+            let table = document.getElementById("data");
+            let status = document.getElementById("status");
+            let rowElements = [];
+            
+            status.innerHTML = "Starting up...";
+
+            table.innerHTML = "";
+            for(var i = 0; i < rowCount; i++) {
+                let tr = document.createElement("tr");
+                let entry = {
+                    "id" : document.createElement("td"),
+                    "zone" : document.createElement("td"),
+                    "taps" : document.createElement("td"),
+
+                    "rotation" : makeGraphNode(),
+                    "acceleration" : makeGraphNode(),
+                    "orientation" : makeGraphNode()
+                };
+
+                tr.appendChild(entry.id);
+                tr.appendChild(entry.zone);
+                tr.appendChild(entry.taps);
+
+                tr.appendChild(entry.rotation.cell);
+                tr.appendChild(entry.acceleration.cell);
+                tr.appendChild(entry.orientation.cell);
+
+                /*entry.rotation.classList.add("graph-cell");
+                entry.acceleration.classList.add("graph-cell");
+                entry.orientation.classList.add("graph-cell");*/
+
+                rowElements.push( entry );
+                table.appendChild(tr);
+            }
+            
+            const socket = io("/monitor");
+            //let nsMontior = io.of("/monitor");
+
+            socket.on("clients", (data) => {
+                for(var i = 0; i < data.length; i++) {
+                    rowElements[i].id.innerHTML = data[i].id;
+                    rowElements[i].zone.innerHTML = data[i].zone;
+                    
+                    //rowElements[i].acceleration.innerHTML = "";
+                    if(data[i].motion.hasOwnProperty("acceleration")){
+                        for(var n = 0; n < 3; n++) {
+                            rowElements[i].acceleration.values[n].style.backgroundColor = "red";
+                            rowElements[i].acceleration.values[n].style.height = (smoothstep(0, 5, Math.abs(data[i].motion.acceleration[n])) * 20) + "px";
+                        }
+                    }
+
+                    if(data[i].motion.hasOwnProperty("rotationRate")){
+                        for(var n = 0; n < 3; n++) {
+                            rowElements[i].rotation.values[n].style.backgroundColor = "red";
+                            rowElements[i].rotation.values[n].style.height = (smoothstep(0, 90, Math.abs(data[i].motion.rotationRate[n])) * 20) + "px";
+                        }
+                    }
+
+                    if(data[i].motion.hasOwnProperty("orientation")){
+                        for(var n = 0; n < 3; n++) {
+                            rowElements[i].orientation.values[n].style.backgroundColor = "red";
+                            rowElements[i].orientation.values[n].style.height = (smoothstep(-180, 180, data[i].motion.orientation[n])) * 20 + "px";
+                        }
+                    }
+
+                    /*rowElements[i].rotation.innerHTML = "";
+                    if(data[i].motion.hasOwnProperty("rotationRate")){
+                        rowElements[i].rotation.appendChild(makeValueDiv("blue", 0, 200, Math.abs(data[i].motion.rotationRate[0])));
+                        rowElements[i].rotation.appendChild(makeValueDiv("blue", 0, 200, Math.abs(data[i].motion.rotationRate[1])));
+                        rowElements[i].rotation.appendChild(makeValueDiv("blue", 0, 200, Math.abs(data[i].motion.rotationRate[2])));
+                    }
+
+                    rowElements[i].orientation.innerHTML = "";
+                    if(data[i].motion.hasOwnProperty("orientation")){
+                        rowElements[i].orientation.appendChild(makeValueDiv("green", 0, 360, Math.abs(data[i].motion.orientation[0])));
+                        rowElements[i].orientation.appendChild(makeValueDiv("green", 0, 360, Math.abs(data[i].motion.orientation[1])));
+                        rowElements[i].orientation.appendChild(makeValueDiv("green", 0, 360, Math.abs(data[i].motion.orientation[2])));
+                    }*/
+
+                    rowElements[i].taps.innerHTML = "";
+                }
+
+                for(var i = data.length; i < rowElements.length; i++) {
+                    rowElements[i].id.innerHTML = "-";
+                    rowElements[i].zone.innerHTML = "";
+                    rowElements[i].acceleration.innerHTML = "";
+                    rowElements[i].rotation.innerHTML = "";
+                    rowElements[i].orientation.innerHTML = "";
+                    rowElements[i].taps.innerHTML = "";
+                }
+            })
+
+            socket.on("error", (data) => {
+                status.innerHTML = "Websocket Error";
+            });
+
+            socket.on("connect", () => {
+                status.innerHTML = "Websocket Connected";
+            });
+
+            socket.on("disconnect", () => {
+                status.innerHTML = "Websocket Disconnected";
+            });
+
+
+        </script>
+
+    </body>
+</html>
