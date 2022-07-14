@@ -199,7 +199,9 @@
                         }
                     }
 
-                    rowElements[i].tap.innerHTML = data[i].tap.count + ", " + data[i].tap.rate.toFixed(2);
+                    if(data[i].tap.hasOwnProperty("count")){
+                        rowElements[i].tap.innerHTML = data[i].tap.count + ", " + data[i].tap.rate.toFixed(2);
+                    }
 
                     /*rowElements[i].rotation.innerHTML = "";
                     if(data[i].motion.hasOwnProperty("rotationRate")){
