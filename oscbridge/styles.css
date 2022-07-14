@@ -1,3 +1,67 @@
 /* styles.css */
 
 /* Add styles here to customize the appearance of your app */
+html,
+body {
+    margin:0px;
+    padding:0px;
+    width:100%;
+    height:100%;
+    background:rgb(124, 201, 234);
+}
+#canvas {
+    background:#cccccc;
+    width:100%;
+    height:100%;
+}
+
+#startup {
+    margin:0px;
+    padding:0px;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#status {
+    padding:20px;
+    font-weight:bold;
+}
+
+#permission {
+    padding:20px;
+    width:70%;
+    background:white;
+}
+
+#permission-button {
+    cursor:pointer;
+    display:inline-block;
+    padding:10px;
+    border-radius:4px;
+    background:rgb(234, 124, 232);
+}
+
+#data tr td {
+    height:26px;
+    border:1px solid black;
+}
+
+#data tr td {
+    height:26px;
+}
+
+.graph-values {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.graph-values div {
+    display:inline-block;
+    margin-left:2px;
+    min-height:1px;
+    width:10px;
+}

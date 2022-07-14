@@ -1,11 +1,19 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron');
+const { app, ipcMain, BrowserWindow } = require('electron');
 const path = require('path');
 const { io } = require("socket.io-client");
 
+
+async function handleSendWSMessage() {
+
+
+}
+
+let mainWindow;
+
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -17,7 +25,7 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -25,6 +33,8 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
+
+  ipcMain.handle('SendWSMessage', handleSendWSMessage)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -50,7 +60,7 @@ var osc = require("osc");
 
 var udpPort = new osc.UDPPort({
   // This is where sclang is listening for OSC messages.
-  remoteAddress: "127.0.0.1",
+  remoteAddress: "0.0.0.0",
   remotePort: 57120,
   metadata: true
 });
@@ -77,7 +87,13 @@ socket.on("disconnect", () => {
 });
 
 socket.on("clients", (data) => {
-  console.log(`Processing ${data.length} players`);
+  //console.log(`Processing ${data.length} players`);
+
+  if(mainWindow!=null && mainWindow!=undefined && !mainWindow.isDestroyed() ){
+    if( mainWindow.webContents != null && mainWindow.webContents != undefined)
+      mainWindow.webContents.send('clients', data);
+  }
+  
   for (i = 0; i < data.length; i++) {
 
     var msg = {
