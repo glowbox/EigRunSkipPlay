@@ -146,7 +146,7 @@
                 let entry = {
                     "id" : document.createElement("td"),
                     "zone" : document.createElement("td"),
-                    "taps" : document.createElement("td"),
+                    "tap" : document.createElement("td"),
 
                     "rotation" : makeGraphNode(),
                     "acceleration" : makeGraphNode(),
@@ -155,7 +155,7 @@
 
                 tr.appendChild(entry.id);
                 tr.appendChild(entry.zone);
-                tr.appendChild(entry.taps);
+                tr.appendChild(entry.tap);
 
                 tr.appendChild(entry.rotation.cell);
                 tr.appendChild(entry.acceleration.cell);
@@ -199,6 +199,8 @@
                         }
                     }
 
+                    rowElements[i].tap.innerHTML = data[i].tap.count + ", " + data[i].tap.rate.toFixed(2);
+
                     /*rowElements[i].rotation.innerHTML = "";
                     if(data[i].motion.hasOwnProperty("rotationRate")){
                         rowElements[i].rotation.appendChild(makeValueDiv("blue", 0, 200, Math.abs(data[i].motion.rotationRate[0])));
@@ -213,7 +215,7 @@
                         rowElements[i].orientation.appendChild(makeValueDiv("green", 0, 360, Math.abs(data[i].motion.orientation[2])));
                     }*/
 
-                    rowElements[i].taps.innerHTML = "";
+                    //rowElements[i].tap.innerHTML = "";
                 }
 
                 for(var i = data.length; i < rowElements.length; i++) {
@@ -222,7 +224,7 @@
                     rowElements[i].acceleration.innerHTML = "";
                     rowElements[i].rotation.innerHTML = "";
                     rowElements[i].orientation.innerHTML = "";
-                    rowElements[i].taps.innerHTML = "";
+                    rowElements[i].tap.innerHTML = "";
                 }
             })
 

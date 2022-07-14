@@ -103,13 +103,13 @@ function addNewClient(socket) {
             });
 
             socket.on("motion", (data) => {
-               console.log(data);
-               clients[id].motion = data;//Object.apply({}, data);
+               // console.log(data);
+               clients[id].motion = data;
             });
 
             socket.on("tap", (data) => {
-                //console.log("Got taps from client " + id + ", count=" + data.count);
-                clients[id].tap = Object.apply({}, data);
+                //console.log("Got taps from client " + id, data);
+                clients[id].tap = data;
             });
 
             socket.on("zone", (data) => {
@@ -147,16 +147,6 @@ io.on("connection", (socket) => {
 
 
 let nsMonitor = io.of("/monitor");
-
-
-function addTap() {
-    tapCount++;
-    tapTotals[tapTotals.length - 1]++;
-}
-
-
-
-
 
 
 setInterval(() => {
