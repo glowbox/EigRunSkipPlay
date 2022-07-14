@@ -123,6 +123,11 @@
             let tapAverageSampleCount = 8;
             let tapTotals = [];
 
+            
+            for(var i = 0; i < tapAverageSampleCount; i++){
+                tapTotals[i] = 0;
+            }
+
             function onTap(event) {               
                 
                 //if(firstTap) {
@@ -246,6 +251,37 @@
 
             update();
 
+/*            
+setInterval(() => {
+
+//let total = 0;
+//for(var i = 0; i < tapTotals.length; i++){
+//    total += tapTotals[i];
+//}
+
+for(var i = 0; i < tapAverageSampleCount - 1; i++) {
+    tapTotals[i] = tapTotals[i+1];
+}
+
+tapTotals[tapTotals.length - 1] = 0;
+//tapCountPerSecond = total / 2.0;
+
+}, 250);
+
+////
+
+let total = 0;
+for(var i = 0; i < tapTotals.length; i++) {
+    total += tapTotals[i];
+}
+let tapCountPerSecond = total / 2.0;
+
+//console.log(`Taps: ${tapCount}, average: ${tapCountPerSecond}`);    
+//console.log("TAP COUNT: " + tapCount);
+
+tapCount = 0;
+
+*/
         </script>
 
     </body>

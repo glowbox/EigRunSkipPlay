@@ -2,7 +2,11 @@ require("dotenv").config();
 
 const fs = require("fs");
 const express = require("express");
-const app = require('express')();
+
+const app = express();
+const httpRedirectApp = express();
+
+const http = require('http');
 const https = require('https');
 
 var privateKey  = fs.readFileSync(process.env.HTTPS_KEY_PATH, 'utf8');
@@ -18,17 +22,41 @@ if(process.env.HTTPS_CA_PATH != "") {
     credentials.ca = ca;
 }
 
+
 const httpsServer = https.createServer(credentials, app);
+const httpServer = http.createServer(httpRedirectApp)
+
 const io = require('socket.io')(httpsServer);
 
-app.use(express.static('public'))
+app.use(express.static('public'));
 
+httpRedirectApp.use( (req, res, next) => {
+    if(!req.secure) {
+        console.log(`Redirecting HTTP request to HTTPS for url: ${req.url}`);
+        
+        let host = req.headers.host;
 
+        // strip off the port number if it exists in the host address.
+        if(host.indexOf(":") != -1) {
+            host = host.substring(0, host.indexOf(":"));
+        }
+
+        let redirectUrl = `https://${host}`;
+
+        // Add the https port number if it's not the default.
+        if(process.env.HTTPS_SERVER_PORT != 443) {
+            redirectUrl = redirectUrl + ":" + process.env.HTTPS_SERVER_PORT;
+        }
+
+        redirectUrl = `${redirectUrl}${req.url}`;
+        
+        return res.redirect(redirectUrl);
+    }
+    next();
+});
 
 const dataBroadcastInterval = 1000 / 5.0;
 
-let tapAverageSampleCount = 8;
-let tapTotals = [];
 
 let clients = [];
 
@@ -43,12 +71,8 @@ for(var i = 0; i < 4; i++) {
     };
 }
 
-console.log(clients);
+//console.log(clients);
 
-
-for(var i = 0; i < tapAverageSampleCount; i++){
-    tapTotals[i] = 0;
-}
 
 function getAvailableId() {
     let id = -1;
@@ -132,36 +156,10 @@ function addTap() {
 
 
 
-setInterval(() => {
-
-    //let total = 0;
-    //for(var i = 0; i < tapTotals.length; i++){
-    //    total += tapTotals[i];
-    //}
-
-    for(var i = 0; i < tapAverageSampleCount - 1; i++) {
-        tapTotals[i] = tapTotals[i+1];
-    }
-    
-    tapTotals[tapTotals.length - 1] = 0;
-    //tapCountPerSecond = total / 2.0;
-
-}, 250);
 
 
 
 setInterval(() => {
-    
-    let total = 0;
-    for(var i = 0; i < tapTotals.length; i++) {
-        total += tapTotals[i];
-    }
-    let tapCountPerSecond = total / 2.0;
-
-    //console.log(`Taps: ${tapCount}, average: ${tapCountPerSecond}`);    
-    //console.log("TAP COUNT: " + tapCount);
-
-    tapCount = 0;
 
     let data = [];
 
@@ -188,4 +186,10 @@ setInterval(() => {
 
 
 // Start the server.
-httpsServer.listen(8080);
+httpsServer.listen(process.env.HTTPS_SERVER_PORT, () => {
+    console.log(`HTTPS server listening on port ${process.env.HTTPS_SERVER_PORT}`);
+});
+
+httpServer.listen(process.env.HTTP_SERVER_PORT, () => {
+    console.log(`HTTP Redirect server listening on port ${process.env.HTTP_SERVER_PORT}`);
+});
