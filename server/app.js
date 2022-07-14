@@ -148,6 +148,23 @@ io.on("connection", (socket) => {
 
 let nsMonitor = io.of("/monitor");
 
+nsMonitor.on("connection", (socket) => {
+    socket.on("color", (data) => {
+        let index = data.id;
+    
+        if(index < 0 || index >= clients.length) {
+            console.log("Set client color: invalid client index: " + index);
+            return;
+        }
+    
+        if(clients[index].socket != null){
+            clients[index].socket.emit("color", data.rgb);
+        } else {
+            // console.log("Client not connected: " + index);
+        }
+    });
+});
+
 
 setInterval(() => {
 

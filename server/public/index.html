@@ -146,6 +146,12 @@
                 status.innerHTML = "Connected, id=" + data.id;
             });
 
+            socket.on("color", (rgb) => {
+                console.log(rgb.join(","));
+                let color = `rgba(${rgb.join(",")}, 1)`;
+                canvas.style.backgroundColor = color;
+            });
+
             socket.on("disconnect", () => {
                 status.innerHTML = "Disconnected";
             });
