@@ -95,6 +95,9 @@
         
         <script>
 
+            const socket = io("/monitor");
+            //let nsMontior = io.of("/monitor");
+
             function smoothstep (min, max, value) {
                 var x = Math.max(0, Math.min(1, (value-min)/(max-min)));
                 return x*x*(3 - 2*x);
@@ -161,6 +164,35 @@
                 tr.appendChild(entry.acceleration.cell);
                 tr.appendChild(entry.orientation.cell);
 
+                let colorPickerCell = document.createElement("td");
+                let colorPicker = document.createElement("input");
+                colorPicker.type = "color";
+                let index = i;
+                colorPicker.addEventListener("change", (event) => {
+
+                    let color = event.originalTarget.value;
+                    color = color.replace("#", "");
+
+                    let r = color.substring(0, 2);
+                    let g = color.substring(2, 4);
+                    let b = color.substring(4);
+
+                    let rFloat = parseInt(r, 16);
+                    let gFloat = parseInt(g, 16);
+                    let bFloat = parseInt(b, 16);
+                    
+                    let clientId = index;
+                    let message = {
+                        "id" : clientId,
+                        "rgb" : [rFloat, gFloat, bFloat]
+                    };
+                    
+                    socket.emit("color", message);
+                });
+
+                colorPickerCell.appendChild(colorPicker);
+                tr.appendChild(colorPickerCell);
+
                 /*entry.rotation.classList.add("graph-cell");
                 entry.acceleration.classList.add("graph-cell");
                 entry.orientation.classList.add("graph-cell");*/
@@ -169,8 +201,7 @@
                 table.appendChild(tr);
             }
             
-            const socket = io("/monitor");
-            //let nsMontior = io.of("/monitor");
+           
 
             socket.on("clients", (data) => {
                 for(var i = 0; i < data.length; i++) {

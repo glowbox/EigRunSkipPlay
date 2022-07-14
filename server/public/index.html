@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
         <script src="socket.io.min.js"></script>
         
@@ -64,6 +64,10 @@
             #zones input.selected {
                 background-color:yellow;
             }
+
+            video {
+                position:absolute;
+            }
         </style>
     </head>
     <body>
@@ -88,7 +92,12 @@
             <pre id="debug"></pre>
         </div>
         
+
+        <script src="NoSleep.min.js"></script>
+
         <script>
+
+            let noSleep = new NoSleep();
 
             let broadcastInterval = (1000 / 5);
 
@@ -118,6 +127,7 @@
                 "rate" : 0
             };
 
+            let isFirstTap = true;
             let tapCount = 0;
             let tapCountPerSecond = 0;
             
@@ -133,9 +143,20 @@
                 tapTotals[i] = 0;
             }
 
+           
             function onTap(event) {               
-                tapTotals[tapAverageSampleCount - 1]++;
-                tapState.count++;
+                let taps = 1;
+
+                tapTotals[tapAverageSampleCount - 1] += taps;
+                tapState.count += taps;
+
+                if(isFirstTap) {
+                    isFirstTap = false;
+                    noSleep.enable();
+                }
+
+                event.preventDevault();
+                event.stopPropagation();
             }
 
             socket.on("error", (data) => {
@@ -144,6 +165,12 @@
 
             socket.on("register", (data) => {
                 status.innerHTML = "Connected, id=" + data.id;
+            });
+
+            socket.on("color", (rgb) => {
+                console.log(rgb.join(","));
+                let color = `rgba(${rgb.join(",")}, 1)`;
+                canvas.style.backgroundColor = color;
             });
 
             socket.on("disconnect", () => {
@@ -155,10 +182,10 @@
             });
 
 
-            if(window.hasOwnProperty("touchstart")) {
-                canvas.addEventListener("touchstart", onTap, false);
+            if(window.hasOwnProperty("ontouchstart")) {               
+                canvas.addEventListener("touchstart", onTap);
             } else {
-                canvas.addEventListener("mousedown", onTap, false);
+                canvas.addEventListener("mousedown", onTap);
             }
 
 
