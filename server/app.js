@@ -59,6 +59,9 @@ const dataBroadcastInterval = 1000 / 5.0;
 
 
 let clients = [];
+let zones = [];
+    
+
 
 for(var i = 0; i < 128; i++) {
     let id = i;
@@ -68,6 +71,23 @@ for(var i = 0; i < 128; i++) {
         "motion" : {},
         "tap" : {}
     };
+}
+
+
+for(var i = 0; i < 5; i++) {
+    zones.push({
+        "clients" : 0,
+        "tap" : {
+            "count" : 0,
+            "rate" : 0
+        },
+        "motion" : {
+            "accelerationMagnitude" : 0,
+            "acceleration" : [0,0,0],
+            "orientation"  : [0,0,0],
+            "rotation"     : [0,0,0]
+        }        
+    });
 }
 
 //console.log(clients);
@@ -165,7 +185,32 @@ nsMonitor.on("connection", (socket) => {
 });
 
 
+function sumArrayElements(destination, source) {
+    for(var i = 0; i < destination.length; i++) {
+        destination[i] += source[i];
+    }
+}
+
+
 setInterval(() => {
+
+    // Reset zone aggregate values as they will be updated
+    // when iterating through the client list.
+    for(var i = 0; i < 5; i++) {
+        zones[i].clients = 0;
+        
+        zones[i].tap = {
+            "count" : 0,
+            "rate" : 0
+        };
+
+        zones[i].motion = {
+            "accelerationMagnitude" : 0,
+            "acceleration" : [0,0,0],
+            "orientation"  : [0,0,0],
+            "rotationRate" : [0,0,0]
+        };
+    }
 
     let data = [];
 
@@ -182,10 +227,55 @@ setInterval(() => {
             entry.motion = Object.assign(entry.motion, client.motion);
             entry.tap = Object.assign(entry.tap, client.tap);
             data.push(entry);
+            
+            let z = clients[i].zone;
+            if((z >= 0) && (z < zones.length)) {                
+                zones[z].clients++;
+
+                zones[z].tap.count += clients[i].tap.count;
+                zones[z].tap.rate += clients[i].tap.rate;
+
+                let ax = clients[i].motion.acceleration[0];
+                let ay = clients[i].motion.acceleration[1];
+                let az = clients[i].motion.acceleration[2];
+
+                zones[z].motion.accelerationMagnitude += Math.sqrt( (ax*ax) + (ay*ay) + (az*az) );
+
+                sumArrayElements(zones[z].motion.acceleration, clients[i].motion.acceleration);
+                sumArrayElements(zones[z].motion.orientation,  clients[i].motion.orientation);
+                sumArrayElements(zones[z].motion.rotationRate,     clients[i].motion.rotationRate);
+            }
         }
     }
-    //console.log(data[0].motion);
+
     nsMonitor.emit("clients", data);
+
+    // Compute averages per-zone.
+    for(var z = 0; z < 5; z++) {
+        if(zones[z].clients > 0) {
+            let c = zones[z].clients;
+
+            // note, tap count is not averaged, it's a sum total of all taps.
+
+            zones[z].tap.rate /= c;
+
+            zones[z].motion.accelerationMagnitude /= c;
+
+            zones[z].motion.acceleration[0] /= c;
+            zones[z].motion.acceleration[1] /= c;
+            zones[z].motion.acceleration[2] /= c;
+
+            zones[z].motion.orientation[0] /= c;
+            zones[z].motion.orientation[1] /= c;
+            zones[z].motion.orientation[2] /= c;
+
+            zones[z].motion.rotationRate[0] /= c;
+            zones[z].motion.rotationRate[1] /= c;
+            zones[z].motion.rotationRate[2] /= c;
+        }
+    }
+
+    nsMonitor.emit("zones", zones);
 
 }, dataBroadcastInterval);
 
