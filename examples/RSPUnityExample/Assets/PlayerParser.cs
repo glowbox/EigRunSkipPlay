@@ -14,14 +14,27 @@ public class PlayerParser : MonoBehaviour
 
 		protected virtual void Start()
 		{
+			if(!Application.isEditor)
+			{
+				Cursor.visible = false;
+			}
+		
 			Receiver.Bind(Address, ReceivedMessage);
+		}
+
+		protected virtual void Update()
+		{
+			if(Input.GetKeyUp(KeyCode.Escape))
+			{
+				Application.Quit();
+			}
 		}
 
 		#endregion
 
-		#region Private Methods
+	#region Private Methods
 
-		private void ReceivedMessage(OSCMessage message)
+	private void ReceivedMessage(OSCMessage message)
 		{
 		int i = 0;
 		int pid = message.Values[i++].IntValue;
