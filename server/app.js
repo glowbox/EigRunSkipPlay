@@ -76,6 +76,7 @@ for(var i = 0; i < 128; i++) {
 
 for(var i = 0; i < 5; i++) {
     zones.push({
+        "rgb" : [Math.floor(Math.random() * 255), 128, Math.floor(Math.random() * 255)],
         "clients" : 0,
         "tap" : {
             "count" : 0,
@@ -134,6 +135,10 @@ function addNewClient(socket) {
             socket.on("zone", (data) => {
                 console.log("Client " + id + " changing zone.", data);
                 clients[id].zone = data.joining;
+
+                if((data.joining >= 0) && (data.joining < zones.length)) {
+                    clients[id].socket.emit("color", zones[data.joining].rgb);
+                }
             });
 
             socket.on("disconnect", () => {
@@ -169,18 +174,34 @@ let nsMonitor = io.of("/monitor");
 
 nsMonitor.on("connection", (socket) => {
     socket.on("color", (data) => {
-        let index = data.id;
-    
-        if(index < 0 || index >= clients.length) {
-            console.log("Set client color: invalid client index: " + index);
-            return;
-        }
-    
-        if(clients[index].socket != null){
-            clients[index].socket.emit("color", data.rgb);
+
+        if(data.hasOwnProperty("zone")) {
+            if((data.zone >= 0) && (data.zone < zones.length)) { 
+
+                zones[data.zone].rgb = data.rgb;
+
+                for(var i = 0; i < clients.length; i++) {
+                    if((clients[i].socket != null) && (clients[i].zone == data.zone)) {
+                        clients[i].socket.emit("color", data.rgb);
+                    }
+                }
+            }
         } else {
-            // console.log("Client not connected: " + index);
+
+            let index = data.id;
+        
+            if(index < 0 || index >= clients.length) {
+                console.log("Set client color: invalid client index: " + index);
+                return;
+            }
+        
+            if(clients[index].socket != null){
+                clients[index].socket.emit("color", data.rgb);
+            } else {
+                // console.log("Client not connected: " + index);
+            }
         }
+
     });
 });
 
