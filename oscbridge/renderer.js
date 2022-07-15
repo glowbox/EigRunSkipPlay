@@ -68,6 +68,7 @@ for(var i = 0; i < rowCount; i++) {
         "rotation" : makeGraphNode(),
         "acceleration" : makeGraphNode(),
         "orientation" : makeGraphNode(),
+        "row" : tr,
         "color": ""
     };
 
@@ -96,7 +97,7 @@ for(var i = 0; i < rowCount; i++) {
         let gFloat = parseInt(g, 16);
         let bFloat = parseInt(b, 16);
         
-        let clientId = index;
+        let clientId = entry.row.value;
         let message = {
             "id" : clientId,
             "rgb" : [rFloat, gFloat, bFloat]
@@ -227,6 +228,7 @@ window.electronAPI.onClients((_event, data) => {
     status.innerHTML = `${data.length} clients connected`;
     
     for(var i = 0; i < data.length; i++) {
+        rowElements[i].row.value = data[i].id;
         rowElements[i].id.innerHTML = data[i].id;
         rowElements[i].zone.innerHTML = data[i].zone;
         
