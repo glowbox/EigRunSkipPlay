@@ -6,8 +6,8 @@ const { io } = require("socket.io-client");
 
 function handleSendWSMessage(data) {
   console.log("handleSendWSMessage");
-  console.log( data.msg);
-  console.log( data.data);
+  console.log(data.msg);
+  console.log(data.data);
 
 }
 
@@ -27,7 +27,7 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -38,9 +38,9 @@ app.whenReady().then(() => {
 
   ipcMain.handle('SendWSMessage', async (event, ...args) => {
     console.log(args[0].msg);
-    if(args.length > 0  ){
-      if(args[0].msg != undefined){
-        if( args[0].msg == "color"){
+    if (args.length > 0) {
+      if (args[0].msg != undefined) {
+        if (args[0].msg == "color") {
           socket.emit("color", args[0].data);
         }
       }
@@ -102,151 +102,171 @@ socket.on("disconnect", () => {
 socket.on("zones", (data) => {
   //console.log(`Processing ${data.length} zones`);
 
-  if(mainWindow!=null && mainWindow!=undefined && !mainWindow.isDestroyed() ){
-    if( mainWindow.webContents != null && mainWindow.webContents != undefined)
+  if (mainWindow != null && mainWindow != undefined && !mainWindow.isDestroyed()) {
+    if (mainWindow.webContents != null && mainWindow.webContents != undefined)
       mainWindow.webContents.send('zones', data);
   }
 
   for (i = 0; i < data.length; i++) {
 
-    var msg = {
-      address: `/zone`,
-      args: [
-        {
-          type: "i",
-          value: i
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[2]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[2]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[2]
-        },
-        {
-          type: "f",
-          value: data[i].tap.count
-        },
-        {
-          type: "f",
-          value: data[i].tap.rate
-        },
-        {
-          type: "f",
-          value: data[i].zone
-        },
-        {
-          type: "f",
-          value: data[i].motion.accelerationMagnitude
-        }
-      ]
-    };
+    try {
+      var msg = {
+        address: `/zone`,
+        args: [
+          {
+            type: "i",
+            value: i
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[2]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[2]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[2]
+          },
+          {
+            type: "f",
+            value: data[i].tap.count
+          },
+          {
+            type: "f",
+            value: data[i].tap.rate
+          },
+          {
+            type: "f",
+            value: data[i].zone
+          },
+          {
+            type: "f",
+            value: data[i].motion.accelerationMagnitude
+          }
+        ]
+      };
+    } catch {
+      console.log("Exception on Zone index " + i);
+    }
   }
-  
+
 });
 
 socket.on("clients", (data) => {
   //console.log(`Processing ${data.length} players`);
 
-  if(mainWindow!=null && mainWindow!=undefined && !mainWindow.isDestroyed() ){
-    if( mainWindow.webContents != null && mainWindow.webContents != undefined)
+  if (mainWindow != null && mainWindow != undefined && !mainWindow.isDestroyed()) {
+    if (mainWindow.webContents != null && mainWindow.webContents != undefined)
       mainWindow.webContents.send('clients', data);
   }
-  
+
   for (i = 0; i < data.length; i++) {
 
-    var msg = {
-      address: `/player`,
-      args: [
-        {
-          type: "i",
-          value: data[i].id
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.rotationRate[2]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.acceleration[2]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[0]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[1]
-        },
-        {
-          type: "f",
-          value: data[i].motion.orientation[2]
-        },
-        {
-          type: "f",
-          value: data[i].tap.count
-        },
-        {
-          type: "f",
-          value: data[i].tap.rate
-        },
-        {
-          type: "f",
-          value: data[i].zone
-        },
-        {
-          type: "f",
-          value: data[i].motion.accelerationMagnitude
-        }
-      ]
-    };
-    //console.log("Sending message", msg.address, msg.args, "to", udpPort.options.remoteAddress + ":" + udpPort.options.remotePort);
-    udpPort.send(msg);
+    if( !data[i].hasOwnProperty("motion"))continue;    
+    if( !data[i].motion.hasOwnProperty("rotationRate"))continue;
+    if( !data[i].motion.hasOwnProperty("acceleration"))continue;
+    if( !data[i].motion.hasOwnProperty("orientation"))continue;
+
+    if( !data[i].hasOwnProperty("tap"))continue;
+    if( !data[i].tap.hasOwnProperty("count"))continue;
+    if( !data[i].tap.hasOwnProperty("rate"))continue;
+
+    if( !data[i].hasOwnProperty("zone"))continue;
+
+    try {
+      var msg = {
+        address: `/player`,
+        args: [
+          {
+            type: "i",
+            value: data[i].id
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.rotationRate[2]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.acceleration[2]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[0]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[1]
+          },
+          {
+            type: "f",
+            value: data[i].motion.orientation[2]
+          },
+          {
+            type: "f",
+            value: data[i].tap.count
+          },
+          {
+            type: "f",
+            value: data[i].tap.rate
+          },
+          {
+            type: "f",
+            value: data[i].zone
+          },
+          {
+            type: "f",
+            value: data[i].motion.accelerationMagnitude
+          }
+        ]
+      };
+      //console.log("Sending message", msg.address, msg.args, "to", udpPort.options.remoteAddress + ":" + udpPort.options.remotePort);
+      udpPort.send(msg);
+    } catch {
+      console.log("Exception on Player index " + i);
+    }
+
   }
 });
 
