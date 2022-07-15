@@ -177,7 +177,8 @@
 
                     "rotation" : makeGraphNode(),
                     "acceleration" : makeGraphNode(),
-                    "orientation" : makeGraphNode()
+                    "orientation" : makeGraphNode(),
+                    "row" : tr
                 };
 
                 tr.appendChild(entry.id);
@@ -205,12 +206,12 @@
                     let gFloat = parseInt(g, 16);
                     let bFloat = parseInt(b, 16);
                     
-                    let clientId = index;
+                    let clientId = entry.row.value;
                     let message = {
                         "id" : clientId,
                         "rgb" : [rFloat, gFloat, bFloat]
                     };
-                    
+                    console.log("SET COLOR", message);
                     socket.emit("color", message);
                 });
 
@@ -322,6 +323,7 @@
             socket.on("clients", (data) => {
                 console.log(data.length);
                 for(var i = 0; i < data.length; i++) {
+                    rowElements[i].row.value = data[i].id;
                     rowElements[i].id.innerHTML = data[i].id;
                     rowElements[i].zone.innerHTML = data[i].zone;
                     
