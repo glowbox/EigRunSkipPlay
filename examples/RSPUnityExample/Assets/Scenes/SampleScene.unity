@@ -288,10 +288,10 @@ MonoBehaviour:
   velocity: 0.3
   velocityVariation: 0.2
   rotationCoeff: 4
-  neighborDist: 2
+  neighborDist: 10
   searchLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
 --- !u!114 &772198371
 MonoBehaviour:
   m_ObjectHideFlags: 0
