@@ -60,8 +60,7 @@ const dataBroadcastInterval = 1000 / 5.0;
 
 let clients = [];
 
-
-for(var i = 0; i < 4; i++) {
+for(var i = 0; i < 128; i++) {
     let id = i;
     clients[i] = {
         "id" : id,
