@@ -85,33 +85,48 @@ public class BoidBehaviour : MonoBehaviour
         var alignment = rotationShaker.Yaw * transform.forward;
         var cohesion = controller.transform.position;
 
+        Quaternion rotation = Quaternion.Euler(player.orientation);
+
+        /*
+         * Quin: I was imagining different "zones" being different colors, and then each zone could control their flocking direction by changing their phone orientations collectively
+         * Ran out of time to implement this
+         * 
         // Looks up nearby boids.
         var nearbyBoids = Physics.OverlapSphere(currentPosition, controller.neighborDist, controller.searchLayer);
-
-        // Accumulates the vectors.
-        foreach (var boid in nearbyBoids)
+        if( nearbyBoids.Length > 0)
         {
-            if (boid.gameObject == gameObject) continue;
-            var t = boid.transform;
-            separation += GetSeparationVector(t);
-            //extra separation from different zones
-            if (boid.GetComponent<BoidBehaviour>()?.player?.zone != player.zone)
+            // Accumulates the vectors.
+            foreach (var boid in nearbyBoids)
             {
+                if (boid.gameObject == gameObject) continue;
+                var t = boid.transform;
                 separation += GetSeparationVector(t);
+                //extra separation from different zones
+                if (boid.GetComponent<BoidBehaviour>()?.player?.zone != player.zone)
+                {
+                    separation += GetSeparationVector(t);
+                }
+                alignment += t.forward;
+                cohesion += t.position;
             }
-            alignment += t.forward;
-            cohesion += t.position;
+
+            var avg = 1.0f / nearbyBoids.Length;
+            alignment *= avg;
+            cohesion *= avg;
+            cohesion = (cohesion - currentPosition).normalized;
+
+            // Calculates a rotation from the vectors.
+            var direction = separation + alignment + cohesion;
+
+            Debug.Log($"nearbyBoids {nearbyBoids.Length} d:{direction} avg:{avg} alignment:{alignment} cohesion:{cohesion} separation:{separation} currentpos{currentPosition}");
+    
+            rotation *= Quaternion.FromToRotation(Vector3.forward, direction.normalized);
         }
-
-        var avg = 1.0f / nearbyBoids.Length;
-        alignment *= avg;
-        cohesion *= avg;
-        cohesion = (cohesion - currentPosition).normalized;
-
-        // Calculates a rotation from the vectors.
-        var direction = separation + alignment + cohesion;
-        //var rotation = Quaternion.FromToRotation(Vector3.forward, direction.normalized);
-        var rotation = Quaternion.Euler(player.orientation);
+        else
+        {
+            rotation = Quaternion.Euler(player.orientation);
+        }
+        */
 
         // Applys the rotation with interpolation.
         if (rotation != currentRotation)

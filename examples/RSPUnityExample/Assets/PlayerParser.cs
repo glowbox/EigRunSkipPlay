@@ -38,9 +38,9 @@ public class PlayerParser : MonoBehaviour
 		player.acceleration.x = message.Values[i++].FloatValue;
 		player.acceleration.y = message.Values[i++].FloatValue;
 		player.acceleration.z = message.Values[i++].FloatValue;
-		player.orientation.x = message.Values[i++].FloatValue;
-		player.orientation.y = message.Values[i++].FloatValue;
-		player.orientation.z = message.Values[i++].FloatValue;
+		player.orientation.y = message.Values[i++].FloatValue *-1.0f;
+		player.orientation.x = message.Values[i++].FloatValue * -1.0f;
+		player.orientation.z = message.Values[i++].FloatValue * -1.0f;
 		player.tapCount = message.Values[i++].FloatValue;
 		player.tapRate = message.Values[i++].FloatValue;
 		player.zone = message.Values[i++].FloatValue;
