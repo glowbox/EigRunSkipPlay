@@ -65,7 +65,7 @@ public class BoidController : MonoBehaviour
         var rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, Random.Range(-180, 180), 0), 0.3f);
         var boid = Instantiate(boidPrefab, position, rotation) as GameObject;
         boid.layer = LayerMask.NameToLayer("Default");
-        BoidBehaviour b = boid.GetComponent<BoidBehaviour>();
+        BoidBehaviour b = boid.GetComponentInChildren<BoidBehaviour>();
         b.controller = this;
         boids.Add(b);
         return boid;

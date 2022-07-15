@@ -41,7 +41,7 @@ public class PlayerParser : MonoBehaviour
 		BoidBehaviour boid = controller.Get(pid);
 		if (boid == null)
         {
-			boid = controller.Spawn().GetComponent<BoidBehaviour>();
+			boid = controller.Spawn().GetComponentInChildren<BoidBehaviour>();
         }
 		PlayerData player = boid.player;
 		player.id = pid;

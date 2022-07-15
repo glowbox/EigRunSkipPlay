@@ -79,8 +79,8 @@ var udpPort = new osc.UDPPort({
 // Open the socket.
 udpPort.open();
 
-const socket = io("https://192.168.1.56:8081/monitor", { transports: ['websocket'], rejectUnauthorized: false });
-//const socket = io("https://eig.glowbox.io/monitor");
+//const socket = io("https://192.168.1.56:8081/monitor", { transports: ['websocket'], rejectUnauthorized: false });
+const socket = io("https://eig.glowbox.io/monitor");
 
 socket.on("error", () => {
   console.log("error");
