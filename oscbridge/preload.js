@@ -14,6 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  sendWSMessage: () => ipcRenderer.invoke('SendWSMessage'),
-  onClients: (data) => ipcRenderer.on('clients', data)
+  sendWSMessage: (data) => ipcRenderer.invoke('SendWSMessage',data),
+  onClients: (data) => ipcRenderer.on('clients', data),
+  onZones: (data) => ipcRenderer.on('zones', data)
 })

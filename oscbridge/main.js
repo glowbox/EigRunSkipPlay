@@ -4,8 +4,10 @@ const path = require('path');
 const { io } = require("socket.io-client");
 
 
-async function handleSendWSMessage() {
-
+function handleSendWSMessage(data) {
+  console.log("handleSendWSMessage");
+  console.log( data.msg);
+  console.log( data.data);
 
 }
 
@@ -25,7 +27,7 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -34,7 +36,16 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
-  ipcMain.handle('SendWSMessage', handleSendWSMessage)
+  ipcMain.handle('SendWSMessage', async (event, ...args) => {
+    console.log(args[0].msg);
+    if(args.length > 0  ){
+      if(args[0].msg != undefined){
+        if( args[0].msg == "color"){
+          socket.emit("color", args[0].data);
+        }
+      }
+    }
+  });
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -68,7 +79,8 @@ var udpPort = new osc.UDPPort({
 // Open the socket.
 udpPort.open();
 
-const socket = io("https://eig.glowbox.io/monitor");
+const socket = io("https://192.168.1.56:8081/monitor", { transports: ['websocket'], rejectUnauthorized: false });
+//const socket = io("https://eig.glowbox.io/monitor");
 
 socket.on("error", () => {
   console.log("error");
@@ -84,6 +96,82 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
   console.log(socket.id); // undefined
+});
+
+
+socket.on("zones", (data) => {
+  //console.log(`Processing ${data.length} zones`);
+
+  if(mainWindow!=null && mainWindow!=undefined && !mainWindow.isDestroyed() ){
+    if( mainWindow.webContents != null && mainWindow.webContents != undefined)
+      mainWindow.webContents.send('zones', data);
+  }
+
+  for (i = 0; i < data.length; i++) {
+
+    var msg = {
+      address: `/zone`,
+      args: [
+        {
+          type: "i",
+          value: i
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.rotationRate[2]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.acceleration[2]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[0]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[1]
+        },
+        {
+          type: "f",
+          value: data[i].motion.orientation[2]
+        },
+        {
+          type: "f",
+          value: data[i].tap.count
+        },
+        {
+          type: "f",
+          value: data[i].tap.rate
+        },
+        {
+          type: "f",
+          value: data[i].zone
+        },
+        {
+          type: "f",
+          value: data[i].motion.accelerationMagnitude
+        }
+      ]
+    };
+  }
+  
 });
 
 socket.on("clients", (data) => {
@@ -150,6 +238,10 @@ socket.on("clients", (data) => {
         {
           type: "f",
           value: data[i].zone
+        },
+        {
+          type: "f",
+          value: data[i].motion.accelerationMagnitude
         }
       ]
     };

@@ -1,16 +1,10 @@
-/* styles.css */
-
-/* Add styles here to customize the appearance of your app */
 html,
 body {
-    margin:0px;
-    padding:0px;
     width:100%;
     height:100%;
-    background:rgb(124, 201, 234);
+    background:rgb(212, 212, 212);
 }
 #canvas {
-    background:#cccccc;
     width:100%;
     height:100%;
 }
@@ -44,11 +38,13 @@ body {
     background:rgb(234, 124, 232);
 }
 
+#zone-data tr td,
 #data tr td {
     height:26px;
     border:1px solid black;
 }
 
+#zone-data tr td,
 #data tr td {
     height:26px;
 }

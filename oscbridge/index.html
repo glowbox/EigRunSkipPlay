@@ -9,17 +9,36 @@
   </head>
   <body>
     <h1>Embodied Intelligence Bridge</h1>
+    <p>Connect to localhost on port 57120</p>
     <!-- 
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
     -->
 
+   
     <div id="canvas">
             
       <div id="status"></div>
-      
-      <table width="100%"">
+    
+      <h2>Zones</h2>
+      <table width="100%">
+          <thead>
+              <tr>
+                  <td>Zone</td>
+                  <td>Clients</td>
+                  <td>Taps</td>
+                  <td>Rotation</td>
+                  <td>Acceleration</td>
+                  <td>Orientation</td>
+                  <td>Color</td>
+              </tr>
+          </thead>
+          <tbody id="zone-data"></tbody>
+      </table>
+
+      <h2>Clients</h2>
+      <table width="100%">
           <thead>
               <tr>
                   <td>ID</td>
