@@ -71,15 +71,21 @@ public class BoidController : MonoBehaviour
         return boid;
     }
 
-    public BoidBehaviour Get(int index)
+    public List<BoidBehaviour> GetBoidsForZone(int id)
     {
-        if (index >= boids.Count || index < 0)
+        return boids.FindAll(x => x.player.zone == id);
+    }
+
+    public BoidBehaviour Get(int id)
+    {
+        int found = boids.FindIndex(x => x.player.id == id);
+        if( found == -1)
         {
             return null;
         }
-        else 
+        else
         {
-            return boids[index];
+            return boids[found];
         }
    }
 }

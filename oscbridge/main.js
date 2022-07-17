@@ -171,6 +171,9 @@ socket.on("zones", (data) => {
           }
         ]
       };
+
+      udpPort.send(msg);
+
     } catch {
       console.log("Exception on Zone index " + i);
     }
@@ -254,10 +257,6 @@ socket.on("clients", (data) => {
           {
             type: "f",
             value: data[i].zone
-          },
-          {
-            type: "f",
-            value: data[i].motion.accelerationMagnitude
           }
         ]
       };

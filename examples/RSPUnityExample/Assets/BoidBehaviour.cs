@@ -35,6 +35,8 @@ public class BoidBehaviour : MonoBehaviour
     // Options for animation playback.
     public float animationSpeedVariation = 0.2f;
 
+    public float zoneScaleMagnifier = 1.0f;
+
     // Random seed.
     float noiseOffset;
 
@@ -54,6 +56,11 @@ public class BoidBehaviour : MonoBehaviour
         var animator = GetComponent<Animator>();
         if (animator)
             animator.speed = Random.Range(-1.0f, 1.0f) * animationSpeedVariation + 1.0f;
+    }
+
+    void SetColor()
+    {
+
     }
 
     void Update()
@@ -136,7 +143,7 @@ public class BoidBehaviour : MonoBehaviour
         }
 
         // applys scale with tapping
-        float scale = Mathf.Clamp(player.tapRate * .2f + 1, 1, 2.5f);
+        float scale = Mathf.Clamp(player.tapRate * .2f + 1, 1, 2.5f) * zoneScaleMagnifier;
         transform.localScale = new Vector3(scale, scale, scale);
 
         //// Moves forawrd.
