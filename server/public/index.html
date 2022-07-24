@@ -16,11 +16,12 @@
             }
             
             #debug {
+                display:none;
             }
 
             #canvas {
                 transition:background-color 0.3s;
-                background:#cccccc;
+                background:#8e8e8e;
                 width:100%;
                 height:100%;
             }
@@ -36,6 +37,7 @@
             }
 
             #status {
+                display:none;
                 padding:20px;
                 font-weight:bold;
             }
@@ -56,14 +58,26 @@
 
             #zones {
                 padding:20px;
+                display:flex;
+                flex-direction:column;
             }
 
             #zones input {
-                padding:20px;
+                margin:10px;
+                background-color: rgba(210,210,210, 0.7);
+                font-weight: bold;
+                line-height: 10px;
+                box-sizing: content-box;
+                padding: 15px;
+                flex: 0.5;
+                border: 0px none;
+                border-radius: 30px;
+                font-size: 15px;
+                color: #202020;
             }
 
             #zones input.selected {
-                background-color:yellow;
+                background-color: white;
             }
 
             video {
@@ -84,11 +98,11 @@
         <div id="canvas">            
             <div id="status"></div>
             <div id="zones">
-                <input type="button" id="zone-0" onclick="setZone(0)" value="zone 1">
-                <input type="button" id="zone-1" onclick="setZone(1)" value="zone 2">
-                <input type="button" id="zone-2" onclick="setZone(2)" value="zone 3">
-                <input type="button" id="zone-3" onclick="setZone(3)" value="zone 4">
-                <input type="button" id="zone-4" onclick="setZone(4)" value="zone 5">
+                <input type="button" id="zone-0" onclick="setZone(0)" value="Mycelium">
+                <input type="button" id="zone-1" onclick="setZone(1)" value="Whales">
+                <input type="button" id="zone-2" onclick="setZone(2)" value="Bees">
+                <input type="button" id="zone-3" onclick="setZone(3)" value="Butterfly">
+                <input type="button" id="zone-4" onclick="setZone(4)" value="Trees">
             </div>
             <pre id="debug"></pre>
         </div>
@@ -156,8 +170,8 @@
                     noSleep.enable();
                 }
 
-                event.preventDevault();
-                event.stopPropagation();
+                //event.preventDefault();
+                //event.stopPropagation();
             }
 
             socket.on("error", (data) => {
