@@ -57,22 +57,24 @@
             }
 
             #zones {
-                padding:20px;
+                padding:5vh 20px;
                 display:flex;
                 flex-direction:column;
+                height: 90vh;
             }
 
             #zones input {
                 margin:10px;
                 background-color: rgba(210,210,210, 0.7);
-                font-weight: bold;
-                line-height: 10px;
+                /*font-weight: bold;*/
+                /*line-height: 10px;*/
                 box-sizing: content-box;
                 padding: 15px;
                 flex: 0.5;
                 border: 0px none;
                 border-radius: 30px;
-                font-size: 15px;
+                font-size: 1em; /*fallback*/
+                font-size: 5vh;
                 color: #202020;
             }
 
@@ -98,11 +100,11 @@
         <div id="canvas">            
             <div id="status"></div>
             <div id="zones">
-                <input type="button" id="zone-0" onclick="setZone(0)" value="Mycelium">
-                <input type="button" id="zone-1" onclick="setZone(1)" value="Whales">
-                <input type="button" id="zone-2" onclick="setZone(2)" value="Bees">
-                <input type="button" id="zone-3" onclick="setZone(3)" value="Butterfly">
-                <input type="button" id="zone-4" onclick="setZone(4)" value="Trees">
+                <input type="button" id="zone-0" onclick="setZone(0)" value="🍄 Mycelium">
+                <input type="button" id="zone-1" onclick="setZone(1)" value="🐋 Whales">
+                <input type="button" id="zone-2" onclick="setZone(2)" value="🐝 Bees">
+                <input type="button" id="zone-3" onclick="setZone(3)" value="🦋 Butterflies">
+                <input type="button" id="zone-4" onclick="setZone(4)" value="🌲 Trees">
             </div>
             <pre id="debug"></pre>
         </div>
